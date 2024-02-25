@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"github.com/Cheasezz/goTodo/pkg/service"
+	_ "github.com/Cheasezz/goTodo/docs"
+	"github.com/Cheasezz/goTodo/internal/service"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "github.com/Cheasezz/goTodo/docs"
 )
 
 type Handler struct {

@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 
-	todo "github.com/Cheasezz/goTodo"
+	todo "github.com/Cheasezz/goTodo/internal/core"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -27,7 +27,7 @@ func (r *AuthPostgres) CreateUser(user todo.User) (int, error) {
 	return id, nil
 }
 
-func (r *AuthPostgres) GetUser(username, password string) (todo.User, error){
+func (r *AuthPostgres) GetUser(username, password string) (todo.User, error) {
 	var user todo.User
 	query := fmt.Sprintf("SELECT id FROM %s WHERE username=$1 AND password_hash=$2", userTable)
 	err := r.db.Get(&user, query, username, password)

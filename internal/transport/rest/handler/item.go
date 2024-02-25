@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	todo "github.com/Cheasezz/goTodo"
+	todo "github.com/Cheasezz/goTodo/internal/core"
 	"github.com/gin-gonic/gin"
 )
 

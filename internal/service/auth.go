@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	todo "github.com/Cheasezz/goTodo"
-	"github.com/Cheasezz/goTodo/pkg/repository"
+	todo "github.com/Cheasezz/goTodo/internal/core"
+	"github.com/Cheasezz/goTodo/internal/repository"
 	"github.com/dgrijalva/jwt-go"
 )
 

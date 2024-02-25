@@ -6,14 +6,15 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 
-	todo "github.com/Cheasezz/goTodo"
-	"github.com/Cheasezz/goTodo/pkg/handler"
-	"github.com/Cheasezz/goTodo/pkg/repository"
-	"github.com/Cheasezz/goTodo/pkg/service"
+	"github.com/Cheasezz/goTodo/internal/repository"
+	"github.com/Cheasezz/goTodo/internal/service"
+	todo "github.com/Cheasezz/goTodo/internal/transport/rest"
+	"github.com/Cheasezz/goTodo/internal/transport/rest/handler"
+	"github.com/joho/godotenv"
+
 	"github.com/spf13/viper"
 )
 
@@ -27,7 +28,6 @@ import (
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
-
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	todo "github.com/Cheasezz/goTodo"
+	todo "github.com/Cheasezz/goTodo/internal/core"
 	"github.com/jmoiron/sqlx"
 )
 

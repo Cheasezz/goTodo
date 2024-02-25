@@ -1,8 +1,8 @@
 package service
 
 import (
-	todo "github.com/Cheasezz/goTodo"
-	"github.com/Cheasezz/goTodo/pkg/repository"
+	todo "github.com/Cheasezz/goTodo/internal/core"
+	"github.com/Cheasezz/goTodo/internal/repository"
 )
 
 type TodoItemService struct {
@@ -35,6 +35,6 @@ func (s *TodoItemService) Delete(userId, itemId int) error {
 	return s.repo.Delete(userId, itemId)
 }
 
-func (s *TodoItemService) Update(userId, itemId int, input todo.UpdateItemInput) error{
+func (s *TodoItemService) Update(userId, itemId int, input todo.UpdateItemInput) error {
 	return s.repo.Update(userId, itemId, input)
 }

@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	todo "github.com/Cheasezz/goTodo"
+	todo "github.com/Cheasezz/goTodo/internal/core"
 	"github.com/gin-gonic/gin"
 )
 

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	todo "github.com/Cheasezz/goTodo"
+	todo "github.com/Cheasezz/goTodo/internal/core"
 	"github.com/gin-gonic/gin"
 )
 
@@ -48,7 +48,7 @@ type getAllListsResponse struct {
 	Data []todo.TodoList `json:"data"`
 }
 
-// @Summary Get All Lists 
+// @Summary Get All Lists
 // @Security ApiKeyAuth
 // @Tags lists
 // @Description get all lists
