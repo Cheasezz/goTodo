@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	todo "github.com/Cheasezz/goTodo/internal/core"
+	"github.com/Cheasezz/goTodo/internal/core"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,7 +20,7 @@ import (
 // @Failure default {object} errorResponse
 // @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
-	var input todo.User
+	var input core.User
 
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())

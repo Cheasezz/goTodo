@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	todo "github.com/Cheasezz/goTodo/internal/core"
+	"github.com/Cheasezz/goTodo/internal/core"
 	"github.com/Cheasezz/goTodo/internal/repository"
 	"github.com/dgrijalva/jwt-go"
 )
@@ -30,7 +30,7 @@ func newAuthService(repo repository.Authorization) *AuthService {
 	return &AuthService{repo: repo}
 }
 
-func (s *AuthService) CreateUser(user todo.User) (int, error) {
+func (s *AuthService) CreateUser(user core.User) (int, error) {
 	user.Password = generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }

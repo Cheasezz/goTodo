@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	todo "github.com/Cheasezz/goTodo/internal/core"
+	"github.com/Cheasezz/goTodo/internal/core"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 )
@@ -17,7 +17,7 @@ func NewTodoListPostgres(db *sqlx.DB) *TodoListPostgres {
 	return &TodoListPostgres{db: db}
 }
 
-func (r *TodoListPostgres) Create(userId int, list todo.TodoList) (int, error) {
+func (r *TodoListPostgres) Create(userId int, list core.TodoList) (int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return 0, err
@@ -41,8 +41,8 @@ func (r *TodoListPostgres) Create(userId int, list todo.TodoList) (int, error) {
 	return id, tx.Commit()
 }
 
-func (r *TodoListPostgres) GetAll(userId int) ([]todo.TodoList, error) {
-	var lists []todo.TodoList
+func (r *TodoListPostgres) GetAll(userId int) ([]core.TodoList, error) {
+	var lists []core.TodoList
 
 	query := fmt.Sprintf("SELECT tl.id, tl.title, tl.description FROM %s tl INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1",
 		todoListsTable, usersListsTable)
@@ -51,8 +51,8 @@ func (r *TodoListPostgres) GetAll(userId int) ([]todo.TodoList, error) {
 	return lists, err
 }
 
-func (r *TodoListPostgres) GetById(userId, listId int) (todo.TodoList, error) {
-	var list todo.TodoList
+func (r *TodoListPostgres) GetById(userId, listId int) (core.TodoList, error) {
+	var list core.TodoList
 
 	query := fmt.Sprintf(`SELECT tl.id, tl.title, tl.description FROM %s tl
 			INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1 AND ul.list_id = $2`,
@@ -71,7 +71,7 @@ func (r *TodoListPostgres) Delete(userId, listId int) error {
 	return err
 }
 
-func (r *TodoListPostgres) Update(userId, listId int, input todo.UpdateListInput) error {
+func (r *TodoListPostgres) Update(userId, listId int, input core.UpdateListInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argId := 1

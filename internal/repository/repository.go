@@ -1,29 +1,29 @@
 package repository
 
 import (
-	todo "github.com/Cheasezz/goTodo/internal/core"
+	"github.com/Cheasezz/goTodo/internal/core"
 	"github.com/jmoiron/sqlx"
 )
 
 type Authorization interface {
-	CreateUser(user todo.User) (int, error)
-	GetUser(username, password string) (todo.User, error)
+	CreateUser(user core.User) (int, error)
+	GetUser(username, password string) (core.User, error)
 }
 
 type TodoList interface {
-	Create(userId int, list todo.TodoList) (int, error)
-	GetAll(userId int) ([]todo.TodoList, error)
-	GetById(userId, listId int) (todo.TodoList, error)
+	Create(userId int, list core.TodoList) (int, error)
+	GetAll(userId int) ([]core.TodoList, error)
+	GetById(userId, listId int) (core.TodoList, error)
 	Delete(userId, listId int) error
-	Update(userId, listId int, input todo.UpdateListInput) error
+	Update(userId, listId int, input core.UpdateListInput) error
 }
 
 type TodoItem interface {
-	Create(listId int, item todo.TodoItem) (int, error)
-	GetAll(userId, listId int) ([]todo.TodoItem, error)
-	GetById(userId, itemId int) (todo.TodoItem, error)
+	Create(listId int, item core.TodoItem) (int, error)
+	GetAll(userId, listId int) ([]core.TodoItem, error)
+	GetById(userId, itemId int) (core.TodoItem, error)
 	Delete(userId, itemId int) error
-	Update(userId, itemId int, input todo.UpdateItemInput) error
+	Update(userId, itemId int, input core.UpdateItemInput) error
 }
 
 type Repository struct {
