@@ -11,7 +11,7 @@ import (
 
 	"github.com/Cheasezz/goTodo/internal/repository"
 	"github.com/Cheasezz/goTodo/internal/service"
-	todo "github.com/Cheasezz/goTodo/internal/transport/rest"
+	restServer "github.com/Cheasezz/goTodo/internal/transport/rest"
 	"github.com/Cheasezz/goTodo/internal/transport/rest/handler"
 	"github.com/joho/godotenv"
 
@@ -56,7 +56,7 @@ func main() {
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
-	srv := new(todo.Server)
+	srv := new(restServer.Server)
 	go func() {
 		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 			logrus.Fatalf("error occured while running http server: %s", err.Error())
