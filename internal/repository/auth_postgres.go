@@ -7,15 +7,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type AuthPostgres struct {
+type Auth struct {
 	db *sqlx.DB
 }
 
-func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
-	return &AuthPostgres{db: db}
+func NewAuthPostgres(db *sqlx.DB) *Auth {
+	return &Auth{db: db}
 }
 
-func (r *AuthPostgres) CreateUser(user core.User) (int, error) {
+func (r *Auth) CreateUser(user core.User) (int, error) {
 	var id int
 
 	query := fmt.Sprintf("INSERT INTO %s (name, username, password_hash) values ($1, $2, $3) RETURNING id", userTable)
@@ -27,7 +27,7 @@ func (r *AuthPostgres) CreateUser(user core.User) (int, error) {
 	return id, nil
 }
 
-func (r *AuthPostgres) GetUser(username, password string) (core.User, error) {
+func (r *Auth) GetUser(username, password string) (core.User, error) {
 	var user core.User
 	query := fmt.Sprintf("SELECT id FROM %s WHERE username=$1 AND password_hash=$2", userTable)
 	err := r.db.Get(&user, query, username, password)

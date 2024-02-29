@@ -53,7 +53,7 @@ func main() {
 	}
 
 	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
+	services := service.NewServices(repos)
 	handlers := handler.NewHandlers(services)
 
 	srv := new(restServer.Server)

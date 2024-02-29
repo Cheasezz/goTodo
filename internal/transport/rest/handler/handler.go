@@ -16,9 +16,9 @@ type Handler struct {
 
 func NewHandlers(s *service.Service) *Handler {
 	return &Handler{
-		AuthHandler:     NewAuthHandler(s.AuthService),
-		TodoListHandler: NewTodoListHandler(s.TodoListService),
-		TodoItemHandler: NewTodoItemHandler(s.TodoItemService),
+		AuthHandler:     NewAuthHandler(s.Auth),
+		TodoListHandler: NewTodoListHandler(s.TodoList),
+		TodoItemHandler: NewTodoItemHandler(s.TodoItem),
 	}
 }
 

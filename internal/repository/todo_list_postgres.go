@@ -9,15 +9,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type TodoListPostgres struct {
+type TodoList struct {
 	db *sqlx.DB
 }
 
-func NewTodoListPostgres(db *sqlx.DB) *TodoListPostgres {
-	return &TodoListPostgres{db: db}
+func NewTodoListPostgres(db *sqlx.DB) *TodoList {
+	return &TodoList{db: db}
 }
 
-func (r *TodoListPostgres) Create(userId int, list core.TodoList) (int, error) {
+func (r *TodoList) Create(userId int, list core.TodoList) (int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return 0, err
@@ -41,7 +41,7 @@ func (r *TodoListPostgres) Create(userId int, list core.TodoList) (int, error) {
 	return id, tx.Commit()
 }
 
-func (r *TodoListPostgres) GetAll(userId int) ([]core.TodoList, error) {
+func (r *TodoList) GetAll(userId int) ([]core.TodoList, error) {
 	var lists []core.TodoList
 
 	query := fmt.Sprintf("SELECT tl.id, tl.title, tl.description FROM %s tl INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1",
@@ -51,7 +51,7 @@ func (r *TodoListPostgres) GetAll(userId int) ([]core.TodoList, error) {
 	return lists, err
 }
 
-func (r *TodoListPostgres) GetById(userId, listId int) (core.TodoList, error) {
+func (r *TodoList) GetById(userId, listId int) (core.TodoList, error) {
 	var list core.TodoList
 
 	query := fmt.Sprintf(`SELECT tl.id, tl.title, tl.description FROM %s tl
@@ -62,7 +62,7 @@ func (r *TodoListPostgres) GetById(userId, listId int) (core.TodoList, error) {
 	return list, err
 }
 
-func (r *TodoListPostgres) Delete(userId, listId int) error {
+func (r *TodoList) Delete(userId, listId int) error {
 	query := fmt.Sprintf(`DELETE FROM %s tl USING %s ul WHERE tl.id = ul.list_id AND ul.user_id=$1 AND ul.list_id=$2`,
 		todoListsTable, usersListsTable)
 
@@ -71,7 +71,7 @@ func (r *TodoListPostgres) Delete(userId, listId int) error {
 	return err
 }
 
-func (r *TodoListPostgres) Update(userId, listId int, input core.UpdateListInput) error {
+func (r *TodoList) Update(userId, listId int, input core.UpdateListInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argId := 1

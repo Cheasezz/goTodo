@@ -5,15 +5,15 @@ import (
 )
 
 type Service struct {
-	*AuthService
-	*TodoListService
-	*TodoItemService
+	*Auth
+	*TodoList
+	*TodoItem
 }
 
-func NewService(repos *repository.Repository) *Service {
+func NewServices(r *repository.Repository) *Service {
 	return &Service{
-		AuthService:     newAuthService(repos.Authorization),
-		TodoListService: NewTodoListService(repos.TodoList),
-		TodoItemService: NewTodoItemService(repos.TodoItem, repos.TodoList),
+		Auth:     newAuthService(r.Auth),
+		TodoList: NewTodoListService(r.TodoList),
+		TodoItem: NewTodoItemService(r.TodoItem, r.TodoList),
 	}
 }

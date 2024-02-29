@@ -2,19 +2,26 @@ package service
 
 import (
 	"github.com/Cheasezz/goTodo/internal/core"
-	"github.com/Cheasezz/goTodo/internal/repository"
 )
 
-type TodoItemService struct {
-	repo     repository.TodoItem
-	listRepo repository.TodoList
+type TodoItemRepo interface {
+	Create(listId int, item core.TodoItem) (int, error)
+	GetAll(userId, listId int) ([]core.TodoItem, error)
+	GetById(userId, itemId int) (core.TodoItem, error)
+	Delete(userId, itemId int) error
+	Update(userId, itemId int, input core.UpdateItemInput) error
 }
 
-func NewTodoItemService(repo repository.TodoItem, listRepo repository.TodoList) *TodoItemService {
-	return &TodoItemService{repo: repo, listRepo: listRepo}
+type TodoItem struct {
+	repo     TodoItemRepo
+	listRepo TodoListRepo
 }
 
-func (s *TodoItemService) Create(userId, listId int, item core.TodoItem) (int, error) {
+func NewTodoItemService(repo TodoItemRepo, listRepo TodoListRepo) *TodoItem {
+	return &TodoItem{repo: repo, listRepo: listRepo}
+}
+
+func (s *TodoItem) Create(userId, listId int, item core.TodoItem) (int, error) {
 	_, err := s.listRepo.GetById(userId, listId)
 	if err != nil {
 		return 0, err
@@ -23,18 +30,18 @@ func (s *TodoItemService) Create(userId, listId int, item core.TodoItem) (int, e
 	return s.repo.Create(listId, item)
 }
 
-func (s *TodoItemService) GetAll(userId, listId int) ([]core.TodoItem, error) {
+func (s *TodoItem) GetAll(userId, listId int) ([]core.TodoItem, error) {
 	return s.repo.GetAll(userId, listId)
 }
 
-func (s *TodoItemService) GetById(userId, itemId int) (core.TodoItem, error) {
+func (s *TodoItem) GetById(userId, itemId int) (core.TodoItem, error) {
 	return s.repo.GetById(userId, itemId)
 }
 
-func (s *TodoItemService) Delete(userId, itemId int) error {
+func (s *TodoItem) Delete(userId, itemId int) error {
 	return s.repo.Delete(userId, itemId)
 }
 
-func (s *TodoItemService) Update(userId, itemId int, input core.UpdateItemInput) error {
+func (s *TodoItem) Update(userId, itemId int, input core.UpdateItemInput) error {
 	return s.repo.Update(userId, itemId, input)
 }

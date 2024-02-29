@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/Cheasezz/goTodo/internal/core"
-	"github.com/Cheasezz/goTodo/internal/repository"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -22,20 +21,25 @@ type tokenClaims struct {
 	UserId int `json:"user_id"`
 }
 
-type AuthService struct {
-	repo repository.Authorization
+type AuthRepo interface {
+	CreateUser(user core.User) (int, error)
+	GetUser(username, password string) (core.User, error)
 }
 
-func newAuthService(repo repository.Authorization) *AuthService {
-	return &AuthService{repo: repo}
+type Auth struct {
+	repo AuthRepo
 }
 
-func (s *AuthService) CreateUser(user core.User) (int, error) {
+func newAuthService(repo AuthRepo) *Auth {
+	return &Auth{repo: repo}
+}
+
+func (s *Auth) CreateUser(user core.User) (int, error) {
 	user.Password = generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }
 
-func (s *AuthService) GenerateToken(username, password string) (string, error) {
+func (s *Auth) GenerateToken(username, password string) (string, error) {
 	user, err := s.repo.GetUser(username, generatePasswordHash(password))
 	if err != nil {
 		return "", err
@@ -51,7 +55,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 	return token.SignedString([]byte(signingKey))
 }
 
-func (s *AuthService) ParseToken(accessToken string) (int, error) {
+func (s *Auth) ParseToken(accessToken string) (int, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
