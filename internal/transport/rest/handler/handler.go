@@ -9,11 +9,17 @@ import (
 )
 
 type Handler struct {
-	services *service.Service
+	*AuthHandler
+	*TodoListHandler
+	*TodoItemHandler
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+func NewHandlers(s *service.Service) *Handler {
+	return &Handler{
+		AuthHandler:     NewAuthHandler(s.AuthService),
+		TodoListHandler: NewTodoListHandler(s.TodoListService),
+		TodoItemHandler: NewTodoItemHandler(s.TodoItemService),
+	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {

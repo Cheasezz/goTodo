@@ -8,7 +8,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *Handler) createItem(c *gin.Context) {
+type TodoItemService interface {
+	Create(userId, listId int, item core.TodoItem) (int, error)
+	GetAll(userId, listId int) ([]core.TodoItem, error)
+	GetById(userId, itemId int) (core.TodoItem, error)
+	Delete(userId, itemId int) error
+	Update(userId, itemId int, input core.UpdateItemInput) error
+}
+
+type TodoItemHandler struct {
+	service TodoItemService
+}
+
+func NewTodoItemHandler(s TodoItemService) *TodoItemHandler {
+	return &TodoItemHandler{service: s}
+}
+
+func (h *TodoItemHandler) createItem(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		return
@@ -26,7 +42,7 @@ func (h *Handler) createItem(c *gin.Context) {
 		return
 	}
 
-	id, err := h.services.TodoItem.Create(userId, listId, input)
+	id, err := h.service.Create(userId, listId, input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -37,7 +53,7 @@ func (h *Handler) createItem(c *gin.Context) {
 	})
 }
 
-func (h *Handler) getAllItems(c *gin.Context) {
+func (h *TodoItemHandler) getAllItems(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		return
@@ -49,7 +65,7 @@ func (h *Handler) getAllItems(c *gin.Context) {
 		return
 	}
 
-	items, err := h.services.TodoItem.GetAll(userId, listId)
+	items, err := h.service.GetAll(userId, listId)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -58,7 +74,7 @@ func (h *Handler) getAllItems(c *gin.Context) {
 	c.JSON(http.StatusOK, items)
 }
 
-func (h *Handler) getItemById(c *gin.Context) {
+func (h *TodoItemHandler) getItemById(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		return
@@ -70,7 +86,7 @@ func (h *Handler) getItemById(c *gin.Context) {
 		return
 	}
 
-	item, err := h.services.TodoItem.GetById(userId, itemId)
+	item, err := h.service.GetById(userId, itemId)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -79,7 +95,7 @@ func (h *Handler) getItemById(c *gin.Context) {
 	c.JSON(http.StatusOK, item)
 }
 
-func (h *Handler) updateItem(c *gin.Context) {
+func (h *TodoItemHandler) updateItem(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		return
@@ -97,7 +113,7 @@ func (h *Handler) updateItem(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.TodoItem.Update(userId, id, input); err != nil {
+	if err := h.service.Update(userId, id, input); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -106,7 +122,7 @@ func (h *Handler) updateItem(c *gin.Context) {
 	})
 }
 
-func (h *Handler) deleteItem(c *gin.Context) {
+func (h *TodoItemHandler) deleteItem(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		return
@@ -118,7 +134,7 @@ func (h *Handler) deleteItem(c *gin.Context) {
 		return
 	}
 
-	err = h.services.TodoItem.Delete(userId, itemId)
+	err = h.service.Delete(userId, itemId)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

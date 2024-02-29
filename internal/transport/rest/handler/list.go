@@ -8,6 +8,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type TodoListService interface {
+	Create(userId int, list core.TodoList) (int, error)
+	GetAll(userId int) ([]core.TodoList, error)
+	GetById(userId, listId int) (core.TodoList, error)
+	Delete(userId, listId int) error
+	Update(userId, listId int, input core.UpdateListInput) error
+}
+
+type TodoListHandler struct {
+	service TodoListService
+}
+
+func NewTodoListHandler(s TodoListService) *TodoListHandler {
+	return &TodoListHandler{service: s}
+}
+
 // @Summary Create todo list
 // @Security ApiKeyAuth
 // @Tags lists
@@ -21,7 +37,7 @@ import (
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
 // @Router /api/lists [post]
-func (h *Handler) createList(c *gin.Context) {
+func (h *TodoListHandler) createList(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		return
@@ -33,7 +49,7 @@ func (h *Handler) createList(c *gin.Context) {
 		return
 	}
 
-	id, err := h.services.TodoList.Create(userId, input)
+	id, err := h.service.Create(userId, input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -60,13 +76,13 @@ type getAllListsResponse struct {
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
 // @Router /api/lists [get]
-func (h *Handler) getAllLists(c *gin.Context) {
+func (h *TodoListHandler) getAllLists(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		return
 	}
 
-	lists, err := h.services.TodoList.GetAll(userId)
+	lists, err := h.service.GetAll(userId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -89,7 +105,7 @@ func (h *Handler) getAllLists(c *gin.Context) {
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
 // @Router /api/lists/:id [get]
-func (h *Handler) getListById(c *gin.Context) {
+func (h *TodoListHandler) getListById(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		return
@@ -101,7 +117,7 @@ func (h *Handler) getListById(c *gin.Context) {
 		return
 	}
 
-	list, err := h.services.TodoList.GetById(userId, id)
+	list, err := h.service.GetById(userId, id)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -110,7 +126,7 @@ func (h *Handler) getListById(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-func (h *Handler) updateList(c *gin.Context) {
+func (h *TodoListHandler) updateList(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		return
@@ -128,7 +144,7 @@ func (h *Handler) updateList(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.TodoList.Update(userId, id, input); err != nil {
+	if err := h.service.Update(userId, id, input); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -137,7 +153,7 @@ func (h *Handler) updateList(c *gin.Context) {
 	})
 }
 
-func (h *Handler) deleteList(c *gin.Context) {
+func (h *TodoListHandler) deleteList(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		return
@@ -149,7 +165,7 @@ func (h *Handler) deleteList(c *gin.Context) {
 		return
 	}
 
-	err = h.services.TodoList.Delete(userId, id)
+	err = h.service.Delete(userId, id)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
