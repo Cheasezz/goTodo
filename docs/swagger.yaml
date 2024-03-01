@@ -1,28 +1,6 @@
 basePath: /
 definitions:
-  handler.errorResponse:
-    properties:
-      message:
-        type: string
-    type: object
-  handler.getAllListsResponse:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/todo.TodoList'
-        type: array
-    type: object
-  handler.signInInput:
-    properties:
-      password:
-        type: string
-      username:
-        type: string
-    required:
-    - password
-    - username
-    type: object
-  todo.ListItem:
+  core.ListItem:
     properties:
       id:
         type: integer
@@ -31,7 +9,7 @@ definitions:
       listId:
         type: integer
     type: object
-  todo.TodoList:
+  core.TodoList:
     properties:
       description:
         type: string
@@ -42,7 +20,7 @@ definitions:
     required:
     - title
     type: object
-  todo.User:
+  core.User:
     properties:
       name:
         type: string
@@ -52,6 +30,28 @@ definitions:
         type: string
     required:
     - name
+    - password
+    - username
+    type: object
+  handler.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  handler.getAllListsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/core.TodoList'
+        type: array
+    type: object
+  handler.signInInput:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
     - password
     - username
     type: object
@@ -107,7 +107,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/todo.TodoList'
+          $ref: '#/definitions/core.TodoList'
       produces:
       - application/json
       responses:
@@ -148,7 +148,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/todo.ListItem'
+            $ref: '#/definitions/core.ListItem'
         "400":
           description: Bad Request
           schema:
@@ -221,7 +221,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/todo.User'
+          $ref: '#/definitions/core.User'
       produces:
       - application/json
       responses:

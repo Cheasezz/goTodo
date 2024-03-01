@@ -92,7 +92,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/todo.TodoList"
+                            "$ref": "#/definitions/core.TodoList"
                         }
                     }
                 ],
@@ -153,7 +153,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/todo.ListItem"
+                            "$ref": "#/definitions/core.ListItem"
                         }
                     },
                     "400": {
@@ -263,7 +263,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/todo.User"
+                            "$ref": "#/definitions/core.User"
                         }
                     }
                 ],
@@ -303,41 +303,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handler.errorResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.getAllListsResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/todo.TodoList"
-                    }
-                }
-            }
-        },
-        "handler.signInInput": {
-            "type": "object",
-            "required": [
-                "password",
-                "username"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "todo.ListItem": {
+        "core.ListItem": {
             "type": "object",
             "properties": {
                 "id": {
@@ -351,7 +317,7 @@ const docTemplate = `{
                 }
             }
         },
-        "todo.TodoList": {
+        "core.TodoList": {
             "type": "object",
             "required": [
                 "title"
@@ -368,7 +334,7 @@ const docTemplate = `{
                 }
             }
         },
-        "todo.User": {
+        "core.User": {
             "type": "object",
             "required": [
                 "name",
@@ -379,6 +345,40 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.errorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.getAllListsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/core.TodoList"
+                    }
+                }
+            }
+        },
+        "handler.signInInput": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
                 "password": {
                     "type": "string"
                 },
