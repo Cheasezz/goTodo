@@ -44,7 +44,7 @@ func (h *TodoListHandler) createList(c *gin.Context) {
 	}
 
 	var input core.TodoList
-	if err := c.BindJSON(&input); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -139,7 +139,7 @@ func (h *TodoListHandler) updateList(c *gin.Context) {
 	}
 
 	var input core.UpdateListInput
-	if err := c.BindJSON(&input); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}

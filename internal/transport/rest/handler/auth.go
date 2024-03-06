@@ -36,7 +36,7 @@ func NewAuthHandler(s AuthService) *AuthHandler {
 func (h *AuthHandler) signUp(c *gin.Context) {
 	var input core.User
 
-	if err := c.BindJSON(&input); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}

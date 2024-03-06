@@ -37,7 +37,7 @@ func (h *TodoItemHandler) createItem(c *gin.Context) {
 	}
 
 	var input core.TodoItem
-	if err := c.BindJSON(&input); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -108,7 +108,7 @@ func (h *TodoItemHandler) updateItem(c *gin.Context) {
 	}
 
 	var input core.UpdateItemInput
-	if err := c.BindJSON(&input); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
