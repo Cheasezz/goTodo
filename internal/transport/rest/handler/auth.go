@@ -47,7 +47,7 @@ func (h *AuthHandler) signUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
+	c.JSON(http.StatusOK, gin.H{
 		"id": id,
 	})
 }
@@ -72,7 +72,7 @@ type signInInput struct {
 func (h *AuthHandler) signIn(c *gin.Context) {
 	var input signInInput
 
-	if err := c.BindJSON(&input); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -83,7 +83,7 @@ func (h *AuthHandler) signIn(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
+	c.JSON(http.StatusOK, gin.H{
 		"token": token,
 	})
 }
