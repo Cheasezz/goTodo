@@ -1,4 +1,4 @@
-package handler
+package v1
 
 import (
 	"net/http"
@@ -15,6 +15,15 @@ type AuthService interface {
 
 type AuthHandler struct {
 	service AuthService
+}
+
+func (h *Handler) initAuthRoutes(router *gin.RouterGroup) {
+	auth := router.Group("/auth")
+	{
+		auth.POST("/sign-up", h.signUp)
+		auth.POST("/sign-in", h.signIn)
+	}
+
 }
 
 func NewAuthHandler(s AuthService) *AuthHandler {

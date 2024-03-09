@@ -10,8 +10,8 @@ import (
 
 	"github.com/Cheasezz/goTodo/internal/repository"
 	"github.com/Cheasezz/goTodo/internal/service"
-	restServer "github.com/Cheasezz/goTodo/internal/transport/rest"
-	"github.com/Cheasezz/goTodo/internal/transport/rest/handler"
+	"github.com/Cheasezz/goTodo/internal/transport/http"
+	restServer "github.com/Cheasezz/goTodo/pkg/server"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -19,7 +19,7 @@ import (
 
 func Run() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
-	
+
 	if err := initConfig(); err != nil {
 		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
@@ -42,11 +42,11 @@ func Run() {
 
 	repos := repository.NewRepository(db)
 	services := service.NewServices(repos)
-	handlers := handler.NewHandlers(services)
+	handlers := http.NewHandlers(services)
 
-	srv := new(restServer.Server)
+	srv := restServer.NewServer(viper.GetString("port"), handlers.Init())
 	go func() {
-		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+		if err := srv.Run(); err != nil {
 			logrus.Fatalf("error occured while running http server: %s", err.Error())
 		}
 	}()

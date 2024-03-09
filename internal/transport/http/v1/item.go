@@ -1,4 +1,4 @@
-package handler
+package v1
 
 import (
 	"net/http"
@@ -18,6 +18,15 @@ type TodoItemService interface {
 
 type TodoItemHandler struct {
 	service TodoItemService
+}
+
+func (h *Handler) initItemRoutes(router *gin.RouterGroup) {
+	items := router.Group("items")
+	{
+		items.GET("/:id", h.getItemById)
+		items.PUT("/:id", h.updateItem)
+		items.DELETE("/:id", h.deleteItem)
+	}
 }
 
 func NewTodoItemHandler(s TodoItemService) *TodoItemHandler {

@@ -1,4 +1,4 @@
-package handler
+package v1
 
 import (
 	"net/http"
@@ -18,6 +18,24 @@ type TodoListService interface {
 
 type TodoListHandler struct {
 	service TodoListService
+}
+
+func (h *Handler) initListRoutes(router *gin.RouterGroup) {
+	lists := router.Group("/lists")
+	{
+		lists.POST("/", h.createList)
+		lists.GET("/", h.getAllLists)
+		lists.GET("/:id", h.getListById)
+		lists.PUT("/:id", h.updateList)
+		lists.DELETE("/:id", h.deleteList)
+
+		items := lists.Group(":id/items")
+		{
+			items.POST("/", h.createItem)
+			items.GET("/", h.getAllItems)
+
+		}
+	}
 }
 
 func NewTodoListHandler(s TodoListService) *TodoListHandler {
