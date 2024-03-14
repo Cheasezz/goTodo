@@ -12,7 +12,7 @@ type Handler struct {
 	*TodoItemHandler
 }
 
-func NewHandlers(s *service.Service) *Handler {
+func NewHandlers(s *service.Services) *Handler {
 	return &Handler{
 		AuthHandler:     NewAuthHandler(s.Auth),
 		TodoListHandler: NewTodoListHandler(s.TodoList),

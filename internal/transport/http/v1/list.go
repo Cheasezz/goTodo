@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -9,11 +10,11 @@ import (
 )
 
 type TodoListService interface {
-	Create(userId int, list core.TodoList) (int, error)
-	GetAll(userId int) ([]core.TodoList, error)
-	GetById(userId, listId int) (core.TodoList, error)
-	Delete(userId, listId int) error
-	Update(userId, listId int, input core.UpdateListInput) error
+	Create(ctx context.Context, userId int, list core.TodoList) (int, error)
+	GetAll(ctx context.Context, userId int) ([]core.TodoList, error)
+	GetById(ctx context.Context, userId, listId int) (core.TodoList, error)
+	Delete(ctx context.Context, userId, listId int) error
+	Update(ctx context.Context, userId, listId int, input core.UpdateListInput) error
 }
 
 type TodoListHandler struct {
@@ -67,7 +68,7 @@ func (h *TodoListHandler) createList(c *gin.Context) {
 		return
 	}
 
-	id, err := h.service.Create(userId, input)
+	id, err := h.service.Create(c, userId, input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -100,7 +101,7 @@ func (h *TodoListHandler) getAllLists(c *gin.Context) {
 		return
 	}
 
-	lists, err := h.service.GetAll(userId)
+	lists, err := h.service.GetAll(c, userId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -135,7 +136,7 @@ func (h *TodoListHandler) getListById(c *gin.Context) {
 		return
 	}
 
-	list, err := h.service.GetById(userId, id)
+	list, err := h.service.GetById(c, userId, id)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -162,7 +163,7 @@ func (h *TodoListHandler) updateList(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Update(userId, id, input); err != nil {
+	if err := h.service.Update(c, userId, id, input); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -183,7 +184,7 @@ func (h *TodoListHandler) deleteList(c *gin.Context) {
 		return
 	}
 
-	err = h.service.Delete(userId, id)
+	err = h.service.Delete(c, userId, id)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

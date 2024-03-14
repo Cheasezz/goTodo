@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -9,11 +10,11 @@ import (
 )
 
 type TodoItemService interface {
-	Create(userId, listId int, item core.TodoItem) (int, error)
-	GetAll(userId, listId int) ([]core.TodoItem, error)
-	GetById(userId, itemId int) (core.TodoItem, error)
-	Delete(userId, itemId int) error
-	Update(userId, itemId int, input core.UpdateItemInput) error
+	Create(ctx context.Context, userId, listId int, item core.TodoItem) (int, error)
+	GetAll(ctx context.Context, userId, listId int) ([]core.TodoItem, error)
+	GetById(ctx context.Context, userId, itemId int) (core.TodoItem, error)
+	Delete(ctx context.Context, userId, itemId int) error
+	Update(ctx context.Context, userId, itemId int, input core.UpdateItemInput) error
 }
 
 type TodoItemHandler struct {
@@ -51,7 +52,7 @@ func (h *TodoItemHandler) createItem(c *gin.Context) {
 		return
 	}
 
-	id, err := h.service.Create(userId, listId, input)
+	id, err := h.service.Create(c, userId, listId, input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -74,7 +75,7 @@ func (h *TodoItemHandler) getAllItems(c *gin.Context) {
 		return
 	}
 
-	items, err := h.service.GetAll(userId, listId)
+	items, err := h.service.GetAll(c, userId, listId)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -95,7 +96,7 @@ func (h *TodoItemHandler) getItemById(c *gin.Context) {
 		return
 	}
 
-	item, err := h.service.GetById(userId, itemId)
+	item, err := h.service.GetById(c, userId, itemId)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -122,7 +123,7 @@ func (h *TodoItemHandler) updateItem(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Update(userId, id, input); err != nil {
+	if err := h.service.Update(c, userId, id, input); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -143,7 +144,7 @@ func (h *TodoItemHandler) deleteItem(c *gin.Context) {
 		return
 	}
 
-	err = h.service.Delete(userId, itemId)
+	err = h.service.Delete(c, userId, itemId)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

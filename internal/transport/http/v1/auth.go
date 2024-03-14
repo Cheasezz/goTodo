@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/Cheasezz/goTodo/internal/core"
@@ -8,8 +9,8 @@ import (
 )
 
 type AuthService interface {
-	CreateUser(user core.User) (int, error)
-	GenerateToken(username, password string) (string, error)
+	CreateUser(ctx context.Context, user core.User) (int, error)
+	GenerateToken(ctx context.Context, username, password string) (string, error)
 	ParseToken(token string) (int, error)
 }
 
@@ -50,7 +51,7 @@ func (h *AuthHandler) signUp(c *gin.Context) {
 		return
 	}
 
-	id, err := h.service.CreateUser(input)
+	id, err := h.service.CreateUser(c, input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -86,7 +87,7 @@ func (h *AuthHandler) signIn(c *gin.Context) {
 		return
 	}
 
-	token, err := h.service.GenerateToken(input.Username, input.Password)
+	token, err := h.service.GenerateToken(c, input.Username, input.Password)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

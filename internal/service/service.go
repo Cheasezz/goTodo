@@ -1,19 +1,17 @@
 package service
 
-import (
-	"github.com/Cheasezz/goTodo/internal/repository"
-)
+import repositories "github.com/Cheasezz/goTodo/internal/repository"
 
-type Service struct {
+type Services struct {
 	*Auth
 	*TodoList
 	*TodoItem
 }
 
-func NewServices(r *repository.Repository) *Service {
-	return &Service{
-		Auth:     newAuthService(r.Auth),
-		TodoList: NewTodoListService(r.TodoList),
-		TodoItem: NewTodoItemService(r.TodoItem, r.TodoList),
+func NewServices(r *repositories.Repositories) *Services {
+	return &Services{
+		Auth:     newAuthService(r.Psql.Auth),
+		TodoList: NewTodoListService(r.Psql.TodoList),
+		TodoItem: NewTodoItemService(r.Psql.TodoItem, r.Psql.TodoList),
 	}
 }

@@ -1,23 +1,24 @@
-package repository
+package psql
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/Cheasezz/goTodo/internal/core"
-	"github.com/jmoiron/sqlx"
+	"github.com/Cheasezz/goTodo/pkg/postgres"
 )
 
 type TodoItem struct {
-	db *sqlx.DB
+	db *postgres.Postgres
 }
 
-func NewTodoItemPostgres(db *sqlx.DB) *TodoItem {
+func NewTodoItemPostgres(db *postgres.Postgres) *TodoItem {
 	return &TodoItem{db: db}
 }
 
-func (r *TodoItem) Create(listId int, item core.TodoItem) (int, error) {
-	tx, err := r.db.Begin()
+func (r *TodoItem) Create(ctx context.Context, listId int, item core.TodoItem) (int, error) {
+	tx, err := r.db.Pool.Begin(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -25,56 +26,56 @@ func (r *TodoItem) Create(listId int, item core.TodoItem) (int, error) {
 	var itemId int
 	createItemQuery := fmt.Sprintf("INSERT INTO %s (title, description) values ($1, $2) RETURNING id", todoItemsTable)
 
-	row := tx.QueryRow(createItemQuery, item.Title, item.Description)
+	row := tx.QueryRow(ctx, createItemQuery, item.Title, item.Description)
 	err = row.Scan(&itemId)
 	if err != nil {
-		tx.Rollback()
+		tx.Rollback(ctx)
 		return 0, err
 	}
 
 	createListItemsQuery := fmt.Sprintf("INSERT INTO %s (list_id, item_id) values ($1, $2)", listsItemsTable)
-	_, err = tx.Exec(createListItemsQuery, listId, itemId)
+	_, err = tx.Exec(ctx, createListItemsQuery, listId, itemId)
 	if err != nil {
-		tx.Rollback()
+		tx.Rollback(ctx)
 		return 0, err
 	}
 
-	return itemId, tx.Commit()
+	return itemId, tx.Commit(ctx)
 }
 
-func (r *TodoItem) GetAll(userId, listId int) ([]core.TodoItem, error) {
+func (r *TodoItem) GetAll(ctx context.Context, userId, listId int) ([]core.TodoItem, error) {
 	var items []core.TodoItem
 	query := fmt.Sprintf(`SELECT ti.id, ti.title, ti.description, ti.done FROM %s ti INNER JOIN %s li on li.item_id = ti.id
 		INNER JOIN %s ul on ul.list_id = li.list_id WHERE li.list_id = $1 AND ul.user_id = $2`,
 		todoItemsTable, listsItemsTable, usersListsTable)
-	if err := r.db.Select(&items, query, listId, userId); err != nil {
+	if err := r.db.Scany.Select(ctx, r.db.Pool, &items, query, listId, userId); err != nil {
 		return nil, err
 	}
 
 	return items, nil
 }
 
-func (r *TodoItem) GetById(userId, itemId int) (core.TodoItem, error) {
+func (r *TodoItem) GetById(ctx context.Context, userId, itemId int) (core.TodoItem, error) {
 	var item core.TodoItem
 	query := fmt.Sprintf(`SELECT ti.id, ti.title, ti.description, ti.done FROM %s ti INNER JOIN %s li on li.item_id = ti.id
 		INNER JOIN %s ul on ul.list_id = li.list_id WHERE ti.id = $1 AND ul.user_id = $2`,
 		todoItemsTable, listsItemsTable, usersListsTable)
-	if err := r.db.Get(&item, query, itemId, userId); err != nil {
+	if err := r.db.Scany.Get(ctx, r.db.Pool, &item, query, itemId, userId); err != nil {
 		return item, err
 	}
 
 	return item, nil
 }
 
-func (r *TodoItem) Delete(userId, itemId int) error {
+func (r *TodoItem) Delete(ctx context.Context, userId, itemId int) error {
 	query := fmt.Sprintf(`DELETE FROM %s ti USING %s li, %s ul
 		WHERE ti.id = li.item_id AND li.list_id = ul.list_id AND ul.user_id = $1 AND ti.id = $2`,
 		todoItemsTable, listsItemsTable, usersListsTable)
-	_, err := r.db.Exec(query, userId, itemId)
+	_, err := r.db.Pool.Exec(ctx, query, userId, itemId)
 	return err
 }
 
-func (r *TodoItem) Update(userId, itemId int, input core.UpdateItemInput) error {
+func (r *TodoItem) Update(ctx context.Context, userId, itemId int, input core.UpdateItemInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argId := 1
@@ -104,7 +105,7 @@ func (r *TodoItem) Update(userId, itemId int, input core.UpdateItemInput) error 
 
 	args = append(args, userId, itemId)
 
-	_, err := r.db.Exec(query, args...)
+	_, err := r.db.Pool.Exec(ctx, query, args...)
 
 	return err
 }

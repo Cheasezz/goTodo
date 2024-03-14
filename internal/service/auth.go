@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"crypto/sha1"
 	"errors"
 	"fmt"
@@ -22,8 +23,8 @@ type tokenClaims struct {
 }
 
 type AuthRepo interface {
-	CreateUser(user core.User) (int, error)
-	GetUser(username, password string) (core.User, error)
+	CreateUser(ctx context.Context, user core.User) (int, error)
+	GetUser(ctx context.Context, username, password string) (core.User, error)
 }
 
 type Auth struct {
@@ -34,13 +35,13 @@ func newAuthService(repo AuthRepo) *Auth {
 	return &Auth{repo: repo}
 }
 
-func (s *Auth) CreateUser(user core.User) (int, error) {
+func (s *Auth) CreateUser(ctx context.Context,user core.User) (int, error) {
 	user.Password = generatePasswordHash(user.Password)
-	return s.repo.CreateUser(user)
+	return s.repo.CreateUser(ctx, user)
 }
 
-func (s *Auth) GenerateToken(username, password string) (string, error) {
-	user, err := s.repo.GetUser(username, generatePasswordHash(password))
+func (s *Auth) GenerateToken(ctx context.Context, username, password string) (string, error) {
+	user, err := s.repo.GetUser(ctx, username, generatePasswordHash(password))
 	if err != nil {
 		return "", err
 	}

@@ -5,11 +5,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	_ "github.com/lib/pq"
+	// _ "github.com/lib/pq"
 
 	"github.com/Cheasezz/goTodo/internal/repository"
 	"github.com/Cheasezz/goTodo/internal/service"
 	"github.com/Cheasezz/goTodo/internal/transport/http"
+	"github.com/Cheasezz/goTodo/pkg/postgres"
 	httpserver "github.com/Cheasezz/goTodo/pkg/server"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
@@ -27,19 +28,13 @@ func Run() {
 		logrus.Fatalf("error loading env variables: %s", err.Error())
 	}
 
-	db, err := repository.NewPostgressDB(repository.Config{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		Username: viper.GetString("db.username"),
-		Password: os.Getenv("DB_PASSWORD"),
-		DBName:   viper.GetString("db.dbname"),
-		SSLMode:  viper.GetString("db.sslmode"),
-	})
+	psql, err := postgres.NewPostgressDB(os.Getenv("PG_URL"))
 	if err != nil {
 		logrus.Fatalf("failed initialize db: %s", err.Error())
 	}
+	defer psql.Close()
 
-	repos := repository.NewRepository(db)
+	repos := repositories.NewRepositories(psql)
 	services := service.NewServices(repos)
 	handlers := http.NewHandlers(services)
 
@@ -57,11 +52,7 @@ func Run() {
 	}
 
 	if err := srv.Shutdown(); err != nil {
-		logrus.Errorf("error occured on server sgutting down: %s", err.Error())
-	}
-
-	if err := db.Close(); err != nil {
-		logrus.Errorf("error occured on db connection close: %s", err.Error())
+		logrus.Errorf("error occured on server shutting down: %s", err.Error())
 	}
 
 	logrus.Print("TodoApp Shutting Down")
