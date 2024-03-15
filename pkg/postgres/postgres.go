@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	maxPoolSize  = 2
+	maxPoolSize  = 15
 	connAttempts = 10
 	connTimeout  = time.Second
 )
