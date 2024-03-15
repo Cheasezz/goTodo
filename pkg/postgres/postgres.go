@@ -21,7 +21,7 @@ type Postgres struct {
 	connAttempts int
 	connTimeout  time.Duration
 
-	Pool *pgxpool.Pool
+	Pool  *pgxpool.Pool
 	Scany *pgxscan.API
 }
 
@@ -30,7 +30,7 @@ func NewPostgressDB(url string) (*Postgres, error) {
 		maxPoolSize:  maxPoolSize,
 		connAttempts: connAttempts,
 		connTimeout:  connTimeout,
-		Scany: pgxscan.DefaultAPI,
+		Scany:        pgxscan.DefaultAPI,
 	}
 
 	poolConfig, err := pgxpool.ParseConfig(url)
@@ -57,11 +57,18 @@ func NewPostgressDB(url string) (*Postgres, error) {
 		return nil, fmt.Errorf("postgres - NewPostgres - connAttempts == 0: %w", err)
 	}
 
+	if err = pg.Pool.Ping(context.Background()); err != nil {
+		return nil, fmt.Errorf("could not ping postgres: %w", err)
+	}
+
+	logrus.Printf("Postgres connected, connAttempts: %d", pg.connAttempts)
+
 	return pg, nil
 }
 
 func (p *Postgres) Close() {
 	if p.Pool != nil {
+		logrus.Print("Postgres closed")
 		p.Pool.Close()
 	}
 }
