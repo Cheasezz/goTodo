@@ -1,6 +1,9 @@
 package service
 
-import repositories "github.com/Cheasezz/goTodo/internal/repository"
+import (
+	repositories "github.com/Cheasezz/goTodo/internal/repository"
+	"github.com/Cheasezz/goTodo/pkg/hash"
+)
 
 type Services struct {
 	*Auth
@@ -8,10 +11,15 @@ type Services struct {
 	*TodoItem
 }
 
-func NewServices(r *repositories.Repositories) *Services {
+type Deps struct {
+	Repos  *repositories.Repositories
+	Hasher hash.PasswordHasher
+}
+
+func NewServices(d Deps) *Services {
 	return &Services{
-		Auth:     newAuthService(r.Psql.Auth),
-		TodoList: NewTodoListService(r.Psql.TodoList),
-		TodoItem: NewTodoItemService(r.Psql.TodoItem, r.Psql.TodoList),
+		Auth:     newAuthService(d.Repos.Psql.Auth, d.Hasher),
+		TodoList: NewTodoListService(d.Repos.Psql.TodoList),
+		TodoItem: NewTodoItemService(d.Repos.Psql.TodoItem, d.Repos.Psql.TodoList),
 	}
 }

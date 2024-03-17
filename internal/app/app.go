@@ -7,9 +7,10 @@ import (
 
 	// _ "github.com/lib/pq"
 
-	"github.com/Cheasezz/goTodo/internal/repository"
+	repositories "github.com/Cheasezz/goTodo/internal/repository"
 	"github.com/Cheasezz/goTodo/internal/service"
 	"github.com/Cheasezz/goTodo/internal/transport/http"
+	"github.com/Cheasezz/goTodo/pkg/hash"
 	"github.com/Cheasezz/goTodo/pkg/postgres"
 	httpserver "github.com/Cheasezz/goTodo/pkg/server"
 	"github.com/joho/godotenv"
@@ -34,8 +35,14 @@ func Run() {
 	}
 	defer psql.Close()
 
+	hasher := hash.NewSHA1Hasher(os.Getenv("PASS_SALT"))
+
 	repos := repositories.NewRepositories(psql)
-	services := service.NewServices(repos)
+	
+	services := service.NewServices(service.Deps{
+		Repos:  repos,
+		Hasher: hasher,
+	})
 	handlers := http.NewHandlers(services)
 
 	srv := httpserver.NewServer(viper.GetString("port"), handlers.Init())

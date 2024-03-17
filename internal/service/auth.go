@@ -2,17 +2,15 @@ package service
 
 import (
 	"context"
-	"crypto/sha1"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/Cheasezz/goTodo/internal/core"
+	"github.com/Cheasezz/goTodo/pkg/hash"
 	"github.com/dgrijalva/jwt-go"
 )
 
 const (
-	salt       = "sdffwe235ef22jmjh78og2"
 	signingKey = "qqvgfg5jk3fwioi#ifsd"
 	tokenTTL   = 12 * time.Hour
 )
@@ -28,20 +26,30 @@ type AuthRepo interface {
 }
 
 type Auth struct {
-	repo AuthRepo
+	repo   AuthRepo
+	hasher hash.PasswordHasher
 }
 
-func newAuthService(repo AuthRepo) *Auth {
-	return &Auth{repo: repo}
+func newAuthService(repo AuthRepo, hasher hash.PasswordHasher) *Auth {
+	return &Auth{repo: repo, hasher: hasher}
 }
 
-func (s *Auth) CreateUser(ctx context.Context,user core.User) (int, error) {
-	user.Password = generatePasswordHash(user.Password)
+func (s *Auth) CreateUser(ctx context.Context, user core.User) (int, error) {
+	pass, err := s.hasher.Hash(user.Password)
+	if err != nil {
+		return 0, err
+	}
+	user.Password = pass
 	return s.repo.CreateUser(ctx, user)
 }
 
 func (s *Auth) GenerateToken(ctx context.Context, username, password string) (string, error) {
-	user, err := s.repo.GetUser(ctx, username, generatePasswordHash(password))
+	pass, err := s.hasher.Hash(password)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := s.repo.GetUser(ctx, username, pass)
 	if err != nil {
 		return "", err
 	}
@@ -71,11 +79,4 @@ func (s *Auth) ParseToken(accessToken string) (int, error) {
 		return 0, errors.New("token claims are not type *tokenClaims")
 	}
 	return claims.UserId, nil
-}
-
-func generatePasswordHash(password string) string {
-	hash := sha1.New()
-	hash.Write([]byte(password))
-
-	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }
