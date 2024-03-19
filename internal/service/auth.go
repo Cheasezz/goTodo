@@ -2,23 +2,17 @@ package service
 
 import (
 	"context"
-	"errors"
+	"strconv"
 	"time"
 
 	"github.com/Cheasezz/goTodo/internal/core"
+	"github.com/Cheasezz/goTodo/pkg/auth"
 	"github.com/Cheasezz/goTodo/pkg/hash"
-	"github.com/dgrijalva/jwt-go"
 )
 
 const (
-	signingKey = "qqvgfg5jk3fwioi#ifsd"
-	tokenTTL   = 12 * time.Hour
+	tokenTTL = 12 * time.Hour
 )
-
-type tokenClaims struct {
-	jwt.StandardClaims
-	UserId int `json:"user_id"`
-}
 
 type AuthRepo interface {
 	CreateUser(ctx context.Context, user core.User) (int, error)
@@ -26,12 +20,17 @@ type AuthRepo interface {
 }
 
 type Auth struct {
-	repo   AuthRepo
-	hasher hash.PasswordHasher
+	repo         AuthRepo
+	hasher       hash.PasswordHasher
+	tokenManager auth.TokenManager
 }
 
-func newAuthService(repo AuthRepo, hasher hash.PasswordHasher) *Auth {
-	return &Auth{repo: repo, hasher: hasher}
+func newAuthService(r AuthRepo, h hash.PasswordHasher, tm auth.TokenManager) *Auth {
+	return &Auth{
+		repo:         r,
+		hasher:       h,
+		tokenManager: tm,
+	}
 }
 
 func (s *Auth) CreateUser(ctx context.Context, user core.User) (int, error) {
@@ -53,30 +52,25 @@ func (s *Auth) GenerateToken(ctx context.Context, username, password string) (st
 	if err != nil {
 		return "", err
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
-		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
-			IssuedAt:  time.Now().Unix(),
-		},
-		user.Id,
-	})
 
-	return token.SignedString([]byte(signingKey))
+	token, err := s.tokenManager.NewJWT(strconv.Itoa(user.Id), tokenTTL)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 func (s *Auth) ParseToken(accessToken string) (int, error) {
-	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
-		}
-		return []byte(signingKey), nil
-	})
+	claims, err := s.tokenManager.Parse(accessToken)
 	if err != nil {
 		return 0, err
 	}
-	claims, ok := token.Claims.(*tokenClaims)
-	if !ok {
-		return 0, errors.New("token claims are not type *tokenClaims")
+
+	intClaims, err := strconv.Atoi(claims)
+	if err != nil {
+		return 0, err
 	}
-	return claims.UserId, nil
+
+	return intClaims, nil
 }

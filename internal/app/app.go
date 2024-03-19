@@ -10,6 +10,7 @@ import (
 	repositories "github.com/Cheasezz/goTodo/internal/repository"
 	"github.com/Cheasezz/goTodo/internal/service"
 	"github.com/Cheasezz/goTodo/internal/transport/http"
+	"github.com/Cheasezz/goTodo/pkg/auth"
 	"github.com/Cheasezz/goTodo/pkg/hash"
 	"github.com/Cheasezz/goTodo/pkg/postgres"
 	httpserver "github.com/Cheasezz/goTodo/pkg/server"
@@ -36,12 +37,17 @@ func Run() {
 	defer psql.Close()
 
 	hasher := hash.NewSHA1Hasher(os.Getenv("PASS_SALT"))
+	tokenManager, err := auth.NewManager(os.Getenv("SIGNING_KEY"))
+	if err != nil {
+		logrus.Fatalf("failed initialize tokenManager: %s", err.Error())
+	}
 
 	repos := repositories.NewRepositories(psql)
-	
+
 	services := service.NewServices(service.Deps{
-		Repos:  repos,
-		Hasher: hasher,
+		Repos:        repos,
+		Hasher:       hasher,
+		TokenManager: tokenManager,
 	})
 	handlers := http.NewHandlers(services)
 
