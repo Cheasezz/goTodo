@@ -26,11 +26,10 @@ func Run() {
 		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
 
-	if err := godotenv.Load(); err != nil {
-		if os.Getenv("APP_MODE") == "prod"{
-			return
+	if os.Getenv("APP_MODE") != "prod"{
+		if err := godotenv.Load(); err != nil {
+			logrus.Fatalf("error loading env variables: %s", err.Error())
 		}
-		logrus.Fatalf("error loading env variables: %s", err.Error())
 	}
 
 	psql, err := postgres.NewPostgressDB(os.Getenv("PG_URL"))
