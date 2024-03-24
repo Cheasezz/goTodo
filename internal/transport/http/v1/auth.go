@@ -5,17 +5,20 @@ import (
 	"net/http"
 
 	"github.com/Cheasezz/goTodo/internal/core"
+	"github.com/Cheasezz/goTodo/pkg/auth"
 	"github.com/gin-gonic/gin"
 )
 
 type AuthService interface {
 	CreateUser(ctx context.Context, user core.User) (int, error)
-	GenerateToken(ctx context.Context, username, password string) (string, error)
-	ParseToken(token string) (int, error)
+	SignIn(ctx context.Context, username, password string) (auth.Tokens, error)
+	RefreshTokens(ctx context.Context, refreshToken string) (auth.Tokens, error)
+	// ParseToken(token string) (int, error)
 }
 
 type AuthHandler struct {
-	service AuthService
+	service      AuthService
+	TokenManager auth.TokenManager
 }
 
 func (h *Handler) initAuthRoutes(router *gin.RouterGroup) {
@@ -23,12 +26,16 @@ func (h *Handler) initAuthRoutes(router *gin.RouterGroup) {
 	{
 		auth.POST("/sign-up", h.signUp)
 		auth.POST("/sign-in", h.signIn)
+		auth.POST("/refresh", h.userRefresh)
 	}
 
 }
 
-func NewAuthHandler(s AuthService) *AuthHandler {
-	return &AuthHandler{service: s}
+func NewAuthHandler(s AuthService, tm auth.TokenManager) *AuthHandler {
+	return &AuthHandler{
+		service:      s,
+		TokenManager: tm,
+	}
 }
 
 // @Summary SignUp
@@ -87,13 +94,43 @@ func (h *AuthHandler) signIn(c *gin.Context) {
 		return
 	}
 
-	token, err := h.service.GenerateToken(c, input.Username, input.Password)
+	token, err := h.service.SignIn(c, input.Username, input.Password)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"token": token,
+	c.JSON(http.StatusOK, tokenResponse{
+		AccessToken:  token.AccessToken,
+		RefreshToken: token.RefreshToken,
+	})
+}
+
+type refreshInput struct {
+	Token string `json:"token" binding:"required"`
+}
+
+func (h *AuthHandler) userRefresh(c *gin.Context) {
+	var inp refreshInput
+	if err := c.BindJSON(&inp); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
+		return
+	}
+
+	// userId, err := getUserId(c)
+	// if err != nil {
+	// 	newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	// 	return
+	// }
+
+	res, err := h.service.RefreshTokens(c.Request.Context(), inp.Token)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, tokenResponse{
+		AccessToken:  res.AccessToken,
+		RefreshToken: res.RefreshToken,
 	})
 }

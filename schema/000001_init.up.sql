@@ -6,6 +6,13 @@ CREATE TABLE users
   password_hash VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE users_sessions
+(
+  user_id       INT          REFERENCES users (id) ON DELETE CASCADE NOT NULL,
+  refresh_token VARCHAR(255) UNIQUE,
+  expires_at    TIMESTAMPTZ  DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE todo_lists
 (
   id          SERIAL       NOT NULL UNIQUE,

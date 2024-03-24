@@ -19,6 +19,11 @@ type Manager struct {
 	signingKey string
 }
 
+type Tokens struct {
+	AccessToken  string
+	RefreshToken string
+}
+
 func NewManager(signingKey string) (*Manager, error) {
 	if signingKey == "" {
 		return nil, errors.New("empty signing key")

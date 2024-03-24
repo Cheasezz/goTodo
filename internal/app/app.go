@@ -27,6 +27,9 @@ func Run() {
 	}
 
 	if err := godotenv.Load(); err != nil {
+		if os.Getenv("APP_MODE") == "prod"{
+			return
+		}
 		logrus.Fatalf("error loading env variables: %s", err.Error())
 	}
 
@@ -49,7 +52,7 @@ func Run() {
 		Hasher:       hasher,
 		TokenManager: tokenManager,
 	})
-	handlers := http.NewHandlers(services)
+	handlers := http.NewHandlers(services, tokenManager)
 
 	srv := httpserver.NewServer(viper.GetString("port"), handlers.Init())
 	logrus.Print("TodoApp Started")

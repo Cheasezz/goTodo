@@ -11,12 +11,15 @@ import (
 )
 
 const (
-	tokenTTL = 12 * time.Hour
+	tokenTTL = 10 * time.Minute
+	refreshTokenTTL = 24 * time.Hour
 )
 
 type AuthRepo interface {
 	CreateUser(ctx context.Context, user core.User) (int, error)
-	GetUser(ctx context.Context, username, password string) (core.User, error)
+	GetUser(ctx context.Context, username, password string) (int, error)
+	SetSession(ctx context.Context, userId string, session core.Session) error
+	GetByRefreshToken(ctx context.Context, refreshToken string) (int, error)
 }
 
 type Auth struct {
@@ -42,35 +45,71 @@ func (s *Auth) CreateUser(ctx context.Context, user core.User) (int, error) {
 	return s.repo.CreateUser(ctx, user)
 }
 
-func (s *Auth) GenerateToken(ctx context.Context, username, password string) (string, error) {
+func (s *Auth) SignIn(ctx context.Context, username, password string) (auth.Tokens, error) {
 	pass, err := s.hasher.Hash(password)
 	if err != nil {
-		return "", err
+		return auth.Tokens{}, err
 	}
 
-	user, err := s.repo.GetUser(ctx, username, pass)
+	userId, err := s.repo.GetUser(ctx, username, pass)
 	if err != nil {
-		return "", err
+		return auth.Tokens{}, err
 	}
 
-	token, err := s.tokenManager.NewJWT(strconv.Itoa(user.Id), tokenTTL)
+	// token, err := s.tokenManager.NewJWT(strconv.Itoa(user.Id), tokenTTL)
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	return s.createSession(ctx, strconv.Itoa(userId))
+}
+// ??????????
+// func (s *Auth) ParseToken(accessToken string) (int, error) {
+// 	claims, err := s.tokenManager.Parse(accessToken)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+
+// 	intClaims, err := strconv.Atoi(claims)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+
+// 	return intClaims, nil
+// }
+
+func (s *Auth) createSession(ctx context.Context, userId string) (auth.Tokens, error) {
+	var (
+		res auth.Tokens
+		err error
+	)
+
+	res.AccessToken, err = s.tokenManager.NewJWT(userId, tokenTTL)
 	if err != nil {
-		return "", err
+		return res, err
 	}
 
-	return token, nil
+	res.RefreshToken, err = s.tokenManager.NewRefreshToken()
+	if err != nil {
+		return res, err
+	}
+
+	session := core.Session{
+		RefreshToken: res.RefreshToken,
+		ExpiresAt:    time.Now().Add(refreshTokenTTL),
+	}
+
+	err = s.repo.SetSession(ctx, userId, session)
+
+	return res, err
 }
 
-func (s *Auth) ParseToken(accessToken string) (int, error) {
-	claims, err := s.tokenManager.Parse(accessToken)
+func (s *Auth) RefreshTokens(ctx context.Context, refreshToken string) (auth.Tokens, error) {
+	userId, err := s.repo.GetByRefreshToken(ctx, refreshToken)
 	if err != nil {
-		return 0, err
+		return auth.Tokens{}, err
 	}
 
-	intClaims, err := strconv.Atoi(claims)
-	if err != nil {
-		return 0, err
-	}
 
-	return intClaims, nil
+	return s.createSession(ctx, strconv.Itoa(userId))
 }
