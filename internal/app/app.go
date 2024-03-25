@@ -38,6 +38,8 @@ func Run() {
 	}
 	defer psql.Close()
 
+	dbMigrate()
+
 	hasher := hash.NewSHA1Hasher(os.Getenv("PASS_SALT"))
 	tokenManager, err := auth.NewManager(os.Getenv("SIGNING_KEY"))
 	if err != nil {
