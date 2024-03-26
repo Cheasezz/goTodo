@@ -7,7 +7,6 @@ import (
 
 	"github.com/Cheasezz/goTodo/internal/core"
 	"github.com/Cheasezz/goTodo/pkg/postgres"
-	"github.com/sirupsen/logrus"
 )
 
 type TodoList struct {
@@ -95,8 +94,6 @@ func (r *TodoList) Update(ctx context.Context, userId, listId int, input core.Up
 
 	args = append(args, listId, userId)
 
-	logrus.Debugf("updateQuery: %s", query)
-	logrus.Debugf("args: %s", args)
 
 	_, err := r.db.Pool.Exec(ctx, query, args...)
 

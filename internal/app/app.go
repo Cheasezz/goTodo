@@ -5,8 +5,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	// _ "github.com/lib/pq"
-
 	repositories "github.com/Cheasezz/goTodo/internal/repository"
 	"github.com/Cheasezz/goTodo/internal/service"
 	"github.com/Cheasezz/goTodo/internal/transport/http"

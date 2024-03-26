@@ -6,7 +6,6 @@ import (
 
 	"github.com/Cheasezz/goTodo/internal/core"
 	"github.com/Cheasezz/goTodo/pkg/postgres"
-	"github.com/sirupsen/logrus"
 )
 
 type Auth struct {
@@ -62,6 +61,6 @@ func (r *Auth) GetByRefreshToken(ctx context.Context, refreshToken string) (int,
 
 	query := fmt.Sprintf("SELECT user_id FROM %s WHERE refresh_token=$1", userSessionTable)
 	err := r.db.Scany.Get(ctx, r.db.Pool, &userId, query, refreshToken)
-	logrus.Printf("From GetByRefrashToken userId: %d", userId)
+
 	return userId, err
 }

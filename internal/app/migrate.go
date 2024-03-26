@@ -22,7 +22,6 @@ func dbMigrate() {
 	if !ok || len(databaseURL) == 0 {
 		logrus.Fatal("migrate: environment variable not declared: PG_URL")
 	}
-	logrus.Printf("URL: %s", databaseURL)
 
 	var (
 		attempts = _defaultAttempts
@@ -36,7 +35,6 @@ func dbMigrate() {
 			break
 		}
 
-		logrus.Printf("Migrate: erroris: %s", err.Error())
 		logrus.Printf("Migrate: postgres is trying to connect, attempts left: %d", attempts)
 		time.Sleep(_defaultTimeout)
 		attempts--

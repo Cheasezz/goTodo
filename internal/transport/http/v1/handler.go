@@ -11,7 +11,6 @@ type Handler struct {
 	*AuthHandler
 	*TodoListHandler
 	*TodoItemHandler
-	// TokenManager auth.TokenManager
 }
 
 func NewHandlers(s *service.Services, tm auth.TokenManager) *Handler {
@@ -19,7 +18,6 @@ func NewHandlers(s *service.Services, tm auth.TokenManager) *Handler {
 		AuthHandler:     NewAuthHandler(s.Auth, tm),
 		TodoListHandler: NewTodoListHandler(s.TodoList),
 		TodoItemHandler: NewTodoItemHandler(s.TodoItem),
-		// TokenManager: tm,
 	}
 }
 

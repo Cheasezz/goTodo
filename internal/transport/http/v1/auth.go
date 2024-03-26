@@ -13,7 +13,6 @@ type AuthService interface {
 	CreateUser(ctx context.Context, user core.User) (int, error)
 	SignIn(ctx context.Context, username, password string) (auth.Tokens, error)
 	RefreshTokens(ctx context.Context, refreshToken string) (auth.Tokens, error)
-	// ParseToken(token string) (int, error)
 }
 
 type AuthHandler struct {
@@ -116,12 +115,6 @@ func (h *AuthHandler) userRefresh(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
-
-	// userId, err := getUserId(c)
-	// if err != nil {
-	// 	newErrorResponse(c, http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
 
 	res, err := h.service.RefreshTokens(c.Request.Context(), inp.Token)
 	if err != nil {

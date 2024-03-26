@@ -56,27 +56,8 @@ func (s *Auth) SignIn(ctx context.Context, username, password string) (auth.Toke
 		return auth.Tokens{}, err
 	}
 
-	// token, err := s.tokenManager.NewJWT(strconv.Itoa(user.Id), tokenTTL)
-	// if err != nil {
-	// 	return "", err
-	// }
-
 	return s.createSession(ctx, strconv.Itoa(userId))
 }
-// ??????????
-// func (s *Auth) ParseToken(accessToken string) (int, error) {
-// 	claims, err := s.tokenManager.Parse(accessToken)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	intClaims, err := strconv.Atoi(claims)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	return intClaims, nil
-// }
 
 func (s *Auth) createSession(ctx context.Context, userId string) (auth.Tokens, error) {
 	var (
@@ -109,7 +90,6 @@ func (s *Auth) RefreshTokens(ctx context.Context, refreshToken string) (auth.Tok
 	if err != nil {
 		return auth.Tokens{}, err
 	}
-
 
 	return s.createSession(ctx, strconv.Itoa(userId))
 }
